@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>YellowBrief</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script type="module" src="/fonts.ts"></script>
+<script type="module" src="/app.ts"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="tie" aria-hidden="true"></span>YellowBrief <small>Cahiers des charges</small></div>
+    <span class="spacer"></span>
+    <span class="note" id="dbnote"></span>
+    <button class="btn primary" id="newBtn" type="button" hidden>+ Nouveau cahier des charges</button>
+    <button class="btn small" id="logoutBtn" type="button" hidden>Déconnexion</button>
+    <button class="btn small theme" id="themeBtn" type="button"></button>
+  </header>
+
+  <section class="login" id="login" hidden aria-labelledby="loginTitle">
+    <h1 id="loginTitle">Espace équipe</h1>
+    <p class="note">Accès réservé à l'équipe YellowTie.</p>
+    <form id="loginForm">
+      <div class="field">
+        <label for="pwd">Mot de passe</label>
+        <input type="password" id="pwd" autocomplete="current-password" required>
+      </div>
+      <div class="error" id="loginErr" role="alert"></div>
+      <button class="btn primary" type="submit">Se connecter</button>
+    </form>
+  </section>
+
+  <div class="layout" id="app" hidden>
+    <aside class="list" aria-label="Projets">
+      <input class="search" id="q" type="search" placeholder="Rechercher un client…" aria-label="Rechercher un client">
+      <div class="filters" id="filters" role="group" aria-label="Filtrer par statut"></div>
+      <div class="projs" id="projs"><div class="empty">Chargement des cahiers des charges…</div></div>
+    </aside>
+
+    <main class="sheet" id="sheet">
+      <div class="welcome" id="welcome">
+        <h2>Aucun cahier des charges ouvert</h2>
+        <p>Choisissez un client dans la liste, ou créez un nouveau cahier des charges avec le bouton « Nouveau ». Les réponses sont enregistrées automatiquement et partagées avec l'équipe.</p>
+      </div>
+      <div id="editor" hidden>
+        <div class="sheet-head">
+          <h1 id="title">Nouveau client</h1>
+          <span class="spacer"></span>
+          <div class="meta">
+            <label class="note" for="status">Statut</label>
+            <select id="status"></select>
+            <span class="saved" id="saved" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="share" id="share"></div>
+        <div class="tabs" role="tablist" id="tabs" aria-label="Pages du cahier des charges"></div>
+        <div id="pages"></div>
+        <div class="page on" id="delbox"></div>
+      </div>
+    </main>
+  </div>
+</div>
+<footer class="foot" id="foot"></footer>
+<div class="toast" id="toast" role="status"></div>
+</body>
+</html>

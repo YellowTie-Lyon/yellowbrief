@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>YellowBrief – Votre cahier des charges</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script type="module" src="/fonts.ts"></script>
+<script type="module" src="/client.ts"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="tie" aria-hidden="true"></span>YellowBrief</div>
+    <span class="spacer"></span>
+    <button class="btn small theme" id="themeBtn" type="button"></button>
+  </header>
+
+  <div class="privacy" id="privacy">
+    <strong>Protection de vos données.</strong> Les informations saisies ici sont utilisées uniquement par YellowTie (agence web, Lyon) pour préparer votre site internet.
+    Elles sont stockées sur des serveurs sécurisés, accessibles à notre équipe, et ne sont ni revendues ni transmises à des tiers.
+    <strong>Merci de ne jamais saisir de mots de passe ou d'identifiants</strong> : indiquez seulement où ils sont conservés, nous vous recontacterons de manière sécurisée.
+    Vous pouvez demander l'accès, la rectification ou la suppression de vos données à tout moment en contactant YellowTie.
+  </div>
+
+  <main class="sheet" id="sheet">
+    <div class="welcome" id="loading"><p>Chargement…</p></div>
+    <div class="welcome" id="invalid" hidden>
+      <h2>Lien invalide</h2>
+      <p>Ce lien n'existe pas ou n'est plus actif. Contactez YellowTie pour obtenir un nouveau lien.</p>
+    </div>
+    <div id="editor" hidden>
+      <div class="intro">
+        <h1 id="title">Votre projet</h1>
+        <p>Merci de compléter les informations ci-dessous. Vous pouvez vous arrêter et revenir plus tard avec le même lien : vos réponses sont enregistrées automatiquement.</p>
+      </div>
+      <div class="tabs" role="tablist" id="tabs" aria-label="Rubriques"></div>
+      <div id="pages"></div>
+      <div class="client-actions">
+        <button class="btn primary" id="saveBtn" type="button">Enregistrer mes réponses</button>
+        <span class="saved" id="saved" role="status" aria-live="polite"></span>
+      </div>
+    </div>
+  </main>
+</div>
+<footer class="foot" id="foot"></footer>
+<div class="toast" id="toast" role="status"></div>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<title>YellowBrief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout : barre de projets à gauche (le classeur), fiche du CDC à droite en 3 onglets comme les pages OneNote, + onglet Export. */
+:root{
+  --bg:#F6F5F1; --panel:#FFFFFF; --ink:#1C2230; --muted:#5E6573; --line:#E3E0D8; --soft:#EFEDE6;
+  --accent:#E8A400; --accent-ink:#5A3E00; --accent-soft:#FFF3D1;
+  --violet:#6B3FA0; --red:#C8322B; --ok:#1F7A4D; --ok-soft:#E3F3EA;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14171D; --panel:#1C2028; --ink:#ECEAE4; --muted:#A3A8B3; --line:#2E333D; --soft:#232832;
+  --accent:#F2B51D; --accent-ink:#FFE3A0; --accent-soft:#3A2F12;
+  --violet:#B79AE6; --red:#F07C74; --ok:#6FD3A0; --ok-soft:#1D3A2B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14171D; --panel:#1C2028; --ink:#ECEAE4; --muted:#A3A8B3; --line:#2E333D; --soft:#232832;
+  --accent:#F2B51D; --accent-ink:#FFE3A0; --accent-soft:#3A2F12;
+  --violet:#B79AE6; --red:#F07C74; --ok:#6FD3A0; --ok-soft:#1D3A2B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);margin:0}
+.wrap{padding-inline:16px;padding-block:16px 40px;max-width:1360px;margin:0 auto}
+header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.brand{font:700 22px/1.1 var(--f-display);letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.brand .tie{width:14px;height:26px;background:var(--accent);clip-path:polygon(25% 0,75% 0,62% 22%,90% 85%,50% 100%,10% 85%,38% 22%)}
+.brand small{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.spacer{flex:1}
+.note{font-size:13px;color:var(--muted)}
+.btn{font:600 14px var(--f-body);border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1C1500}
+.btn.primary:hover{filter:brightness(.96)}
+.btn.danger{color:var(--red)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,.proj:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+aside.list{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:900px){aside.list{position:static}}
+.search{width:100%;font:14px var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);margin-bottom:8px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{font:500 12px var(--f-body);border:1px solid var(--line);background:transparent;color:var(--muted);padding:3px 9px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.projs{display:flex;flex-direction:column;gap:4px;max-height:65vh;overflow:auto}
+.proj{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;text-align:left;width:100%;border:1px solid transparent;background:transparent;color:var(--ink);border-radius:8px;padding:8px 10px;cursor:pointer;font:inherit}
+.proj:hover{background:var(--soft)}
+.proj[aria-current="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.proj .n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj .d{grid-column:1/-1;font:12px var(--f-mono);color:var(--muted)}
+.pill{font:600 11px var(--f-body);padding:2px 8px;border-radius:999px;white-space:nowrap;align-self:start;border:1px solid var(--line);color:var(--muted)}
+.pill.s-rdv{color:var(--violet);border-color:currentColor}
+.pill.s-maquette{color:var(--accent-ink);background:var(--accent-soft);border-color:var(--accent)}
+.pill.s-production{color:var(--ink);background:var(--soft)}
+.pill.s-recette{color:var(--red);border-color:currentColor}
+.pill.s-enligne{color:var(--ok);background:var(--ok-soft);border-color:transparent}
+.empty{padding:20px 8px;color:var(--muted);font-size:14px}
+main.sheet{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);min-width:0}
+.sheet-head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;padding:18px 20px 0}
+.sheet-head h1{font:700 26px/1.15 var(--f-display);margin:0;text-wrap:balance;min-width:0;overflow-wrap:anywhere}
+.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select{font:500 14px var(--f-body);padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.saved{font:12px var(--f-mono);color:var(--muted);min-width:90px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);padding:14px 20px 0;overflow-x:auto}
+.tab{font:600 14px var(--f-body);border:0;background:transparent;color:var(--muted);padding:10px 12px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .pct{font:500 11px var(--f-mono);color:var(--muted)}
+.page{padding:20px;display:none}
+.page.on{display:block}
+.page-title{font:600 22px var(--f-display);margin:0 0 4px;padding-bottom:6px;border-bottom:1px solid var(--line);max-width:420px}
+.group{margin-top:22px}
+.group h3{font:600 14px var(--f-body);text-decoration:underline;text-underline-offset:3px;margin:0 0 10px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px 18px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field.wide{grid-column:1/-1}
+.field label{font:500 14px var(--f-body)}
+.field.key label{font-weight:700}
+.field.violet label{color:var(--violet)}
+.field.red label{color:var(--red);text-decoration:underline}
+.hint{font-size:12.5px;font-style:italic;color:var(--muted)}
+input[type=text],textarea{font:15px/1.45 var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{min-height:70px;resize:vertical}
+input[type=text]:hover,textarea:hover{border-color:var(--muted)}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:6px 18px}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.check input{width:17px;height:17px;accent-color:var(--accent)}
+.toggle-woo{margin-top:22px}
+.export{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.card{border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.card h3{font:600 16px var(--f-display);margin:0}
+.card p{margin:0;color:var(--muted);font-size:13.5px}
+.card pre{font:12.5px/1.5 var(--f-mono);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;max-height:380px;overflow:auto;white-space:pre-wrap;margin:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--soft);border-radius:8px;padding:8px 10px;font-size:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.welcome{padding:40px 24px;text-align:left;max-width:560px}
+.welcome h2{font:700 24px var(--f-display);margin:0 0 8px}
+.welcome p{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="tie" aria-hidden="true"></span>YellowBrief <small>Cahiers des charges</small></div>
+    <span class="spacer"></span>
+    <span class="note" id="dbnote"></span>
+    <button class="btn primary" id="newBtn" type="button">+ Nouveau cahier des charges</button>
+  </header>
+
+  <div class="layout">
+    <aside class="list" aria-label="Projets">
+      <input class="search" id="q" type="search" placeholder="Rechercher un client…" aria-label="Rechercher un client">
+      <div class="filters" id="filters" role="group" aria-label="Filtrer par statut"></div>
+      <div class="projs" id="projs"><div class="empty">Chargement des cahiers des charges…</div></div>
+    </aside>
+
+    <main class="sheet" id="sheet">
+      <div class="welcome" id="welcome">
+        <h2>Aucun cahier des charges ouvert</h2>
+        <p>Choisissez un client dans la liste, ou créez un nouveau cahier des charges avec le bouton « Nouveau ». Les réponses sont enregistrées automatiquement et partagées avec l'équipe.</p>
+      </div>
+      <div id="editor" hidden>
+        <div class="sheet-head">
+          <h1 id="title">Nouveau client</h1>
+          <span class="spacer"></span>
+          <div class="meta">
+            <label class="note" for="status">Statut</label>
+            <select id="status"></select>
+            <span class="saved" id="saved" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <div id="pages"></div>
+      </div>
+    </main>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const STATUSES=[["rdv","Rendez-vous"],["maquette","Maquette"],["production","Production"],["recette","Recette"],["enligne","En ligne"]];
+const statusLabel=k=>(STATUSES.find(s=>s[0]===k)||STATUSES[0])[1];
+
+/* Modèle du CDC : 3 pages comme le OneNote */
+const PAGES=[
+ {id:"client",title:"Informations client",groups:[
+  {fields:[
+   ["livraison","Date de livraison estimée",{cls:"key violet"}],
+   ["entreprise","Nom de l'entreprise",{cls:"key"}],
+   ["offre","Offre signée par le client"],
+   ["dirigeants","Dirigeant(s)"],
+   ["interlocuteur","Interlocuteur principal (nom, prénom, téléphone, e-mail)",{hint:"Téléphone et e-mail obligatoires."}],
+   ["activite","Description de l'activité",{area:1,wide:1}],
+   ["services","Service(s) et/ou Produit(s)",{area:1,wide:1}],
+   ["objectifs","Objectifs du site et clients visés",{area:1,wide:1}],
+  ]},
+  {title:"Coordonnées de l'entreprise à afficher sur le site internet",fields:[
+   ["adresse","Adresse postale de l'entreprise"],["telephone","N° téléphone de l'entreprise"],
+   ["email","E-mail de contact"],["horaires","Horaires d'ouverture"],["reseaux","Liens réseaux sociaux",{wide:1}],
+  ]},
+  {title:"Remarques",fields:[["rq_client","Remarques",{area:1,wide:1,nolabel:1}]]},
+ ]},
+ {id:"existant",title:"Analyse de l'existant",groups:[
+  {fields:[
+   ["domaine_existant","Nom de domaine existant",{cls:"red"}],
+   ["site_actuel","Lien du site actuel / CMS utilisé"],
+   ["hebergeur_web","Hébergeur web"],["hebergeur_domaine","Hébergeur nom de domaine"],
+   ["hebergeur_mail","Hébergeur e-mail"],
+   ["type_mail","Type d'hébergement e-mail (IMAP, POP, Office 365 ou Google Workspace)"],
+   ["adresses_mail","Adresses e-mail existantes",{area:1}],
+   ["pages_conserver","Pages importantes du site actuel à conserver",{area:1,hint:"Pour les redirections 301 à la mise en ligne."}],
+   ["analytics","Compte Google Analytics / Search Console pour ce site ?"],
+   ["acces","Accès clients (hébergeur, site existant…)",{hint:"Ne pas noter les identifiants ici : indiquer seulement où ils sont stockés."}],
+   ["en_ligne","Le site actuel doit-il rester en ligne pendant la production ?",{wide:1,hint:"Dans tous les cas, nous produisons sur votrenomdedomaine.yellowtie.fr."}],
+  ]},
+  {title:"Remarques",fields:[["rq_existant","Remarques",{area:1,wide:1,nolabel:1}]]},
+ ]},
+ {id:"perimetre",title:"Périmètre du projet",groups:[
+  {fields:[
+   ["domaine_choisi","Nom de domaine sélectionné",{cls:"key red"}],
+   ["maquette_lien","Maquette Emergent (lien)",{cls:"key violet"}],
+   ["maquette_validee","Maquette validée par le client le",{cls:"key violet",hint:"Textes et photos de la maquette provisoires ; modification du design après validation = devis."}],
+   ["arborescence","Arborescence principale",{area:1,hint:"Une page par ligne."}],
+   ["footer_menu","Menu bas de site",{area:1,hint:"Une entrée par ligne."}],
+   ["references","Sites références envoyés par le client (mini. 3)",{area:1,wide:1,hint:"Un lien par ligne, avec ce qui plaît."}],
+  ]},
+  {title:"Design graphique",fields:[
+   ["charte","Charte graphique existante ? (logo, police, couleurs)"],
+   ["polices","Polices à utiliser (Google Font par défaut)"],
+   ["couleurs","Couleurs à utiliser",{hint:"NB : si possible, demander les codes hexadécimaux."}],
+   ["photos","Utilisation de photos / vidéos libres de droit ?"],
+  ]},
+  {title:"Contenus à fournir par le client",checks:[
+   ["c_logo","Logo (SVG ou PNG haute définition)"],["c_textes","Textes des pages"],["c_photos","Photos réelles"],
+   ["c_fiches","Fiches produits / services (tableur YellowTie)"],["c_legal","Informations légales (raison sociale, SIREN, siège)"],
+  ],fields:[["date_contenus","Date limite de remise des contenus",{cls:"key"}]]},
+  {title:"Périmètre technique",fields:[
+   ["repetitifs","Contenus répétitifs (produits, services, réalisations…) : quoi, combien, quelles infos par fiche",{area:1,wide:1,hint:"Sert à créer les champs personnalisés et le tableur de collecte envoyé au client."}],
+   ["specificites","Spécificités à mettre en place (compte utilisateur, feed Instagram, chatbot, extensions tierces)",{area:1,wide:1}],
+   ["avis","Avis clients / témoignages (synchro Google Avis ou carrousel)"],
+   ["formulaires","Formulaire de contact / devis (champs + e-mail de réception)"],
+   ["mail_domaine","Création d'un e-mail @nomdedomaine (Oui/Non)"],
+   ["gmb","Création d'un Google My Business (Oui/Non)",{hint:"Si GMB existe déjà, demander un accès pour yellowtielyon@gmail.com."}],
+   ["motscles","Mots-clés et zone géographique visée",{area:1,wide:1}],
+  ]},
+  {title:"Si WooCommerce",woo:1,fields:[
+   ["woo_adresse","Adresse de la boutique"],["woo_inventaire","Inventaire des produits (sinon tableau Excel à remplir)"],
+   ["woo_categories","Catégories des produits (arborescence)"],["woo_stocks","Gestion des stocks (Oui/Non)"],
+   ["woo_tva","Gestion de la TVA (taux à ajouter)"],["woo_expedition","Frais et pays d'expédition"],
+   ["woo_paiement","Méthodes de paiement"],["woo_email","E-mail de destination des nouvelles commandes"],
+  ]},
+  {title:"Remarques chef de projet",fields:[["rq_projet","Remarques chef de projet",{area:1,wide:1,nolabel:1}]]},
+ ]},
+];
+const ALL_FIELDS=PAGES.flatMap(p=>p.groups.flatMap(g=>g.fields||[]));
+const DEFAULTS={arborescence:"Accueil\nContactez-nous",footer_menu:"Navigation\nPages légales\nCoordonnées (téléphone, e-mail, adresse)"};
+
+/* État */
+let db=null, coll=null, docs=[], currentId=null, current=null, activeTab="client", filter="all", query="", localMode=false;
+const pending={}; let saveTimer=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("on"),1800)}
+const fmtDate=ms=>ms?new Date(ms).toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"}):"";
+
+/* Liste */
+function renderFilters(){
+  const counts={all:docs.length};STATUSES.forEach(([k])=>counts[k]=docs.filter(d=>d.status===k).length);
+  $("#filters").innerHTML=[["all","Tous"],...STATUSES].map(([k,l])=>`<button type="button" class="chip" data-f="${k}" aria-pressed="${filter===k}">${l} · ${counts[k]||0}</button>`).join("");
+}
+function renderList(){
+  renderFilters();
+  const q=query.trim().toLowerCase();
+  const list=docs.filter(d=>(filter==="all"||d.status===filter)&&(!q||((d.f?.entreprise||d.name||"")+" "+(d.f?.domaine_choisi||"")).toLowerCase().includes(q)));
+  const box=$("#projs");
+  if(!docs.length){box.innerHTML=`<div class="empty">Aucun cahier des charges pour l'instant.<br>Créez le premier avec « Nouveau cahier des charges ».</div>`;return}
+  if(!list.length){box.innerHTML=`<div class="empty">Aucun résultat.</div>`;return}
+  box.innerHTML=list.map(d=>`<button type="button" class="proj" data-id="${esc(d.id)}" aria-current="${d.id===currentId}">
+    <span class="n">${esc(d.f?.entreprise||d.name||"Sans nom")}</span><span class="pill s-${esc(d.status||"rdv")}">${statusLabel(d.status)}</span>
+    <span class="d">${d.f?.livraison?"Livraison : "+esc(d.f.livraison)+" · ":""}modifié ${fmtDate(d.updatedAt)}</span></button>`).join("");
+}
+
+/* Fiche */
+function fieldHTML([k,label,o={}]){
+  const v=current?.f?.[k]??"";
+  const cls=["field",o.wide?"wide":"",o.cls||""].join(" ");
+  const input=o.area?`<textarea id="f_${k}" data-k="${k}" rows="3">${esc(v)}</textarea>`:`<input type="text" id="f_${k}" data-k="${k}" value="${esc(v)}">`;
+  return `<div class="${cls}">${o.nolabel?`<label class="hint" for="f_${k}">Notes libres</label>`:`<label for="f_${k}">${esc(label)} :</label>`}${o.hint?`<span class="hint">${esc(o.hint)}</span>`:""}${input}</div>`;
+}
+function pagePct(p){
+  const fs=p.groups.filter(g=>!g.woo||current?.woo).flatMap(g=>g.fields||[]).filter(f=>!f[0].startsWith("rq_"));
+  const done=fs.filter(f=>String(current?.f?.[f[0]]??"").trim()).length;
+  return fs.length?Math.round(done*100/fs.length):0;
+}
+function renderTabs(){
+  $("#tabs").innerHTML=PAGES.map(p=>`<button type="button" class="tab" role="tab" data-tab="${p.id}" aria-selected="${activeTab===p.id}">${p.title} <span class="pct">${pagePct(p)} %</span></button>`).join("")+
+   `<button type="button" class="tab" role="tab" data-tab="export" aria-selected="${activeTab==="export"}">Export</button>`;
+}
+function renderEditor(){
+  if(!current){$("#editor").hidden=true;$("#welcome").hidden=false;return}
+  $("#welcome").hidden=true;$("#editor").hidden=false;
+  $("#title").textContent=current.f?.entreprise||current.name||"Nouveau client";
+  $("#status").innerHTML=STATUSES.map(([k,l])=>`<option value="${k}" ${current.status===k?"selected":""}>${l}</option>`).join("");
+  renderTabs();
+  $("#pages").innerHTML=PAGES.map(p=>`<section class="page ${activeTab===p.id?"on":""}" data-page="${p.id}">
+    <h2 class="page-title">${p.title}</h2>
+    ${p.groups.map(g=>{
+      if(g.woo){return `<div class="toggle-woo"><label class="check"><input type="checkbox" id="woo" ${current.woo?"checked":""}> Boutique en ligne (WooCommerce)</label></div>`+(current.woo?`<div class="group"><h3>${g.title} :</h3><div class="fields">${g.fields.map(fieldHTML).join("")}</div></div>`:"")}
+      return `<div class="group">${g.title?`<h3>${g.title} :</h3>`:""}
+        ${g.checks?`<div class="checks" style="margin-bottom:14px">${g.checks.map(([k,l])=>`<label class="check"><input type="checkbox" data-c="${k}" id="c_${k}" ${current.checks?.[k]?"checked":""}> ${esc(l)}</label>`).join("")}</div>`:""}
+        <div class="fields">${(g.fields||[]).map(fieldHTML).join("")}</div></div>`}).join("")}
+    <div class="group"><div id="del_${p.id}"></div></div>
+  </section>`).join("")+`<section class="page ${activeTab==="export"?"on":""}" data-page="export">${exportHTML()}</section>`;
+  renderDelete();
+}
+function renderDelete(){
+  const box=document.getElementById("del_perimetre"); if(!box) return;
+  box.innerHTML=renderDelete.ask?`<div class="confirm">Supprimer définitivement ce cahier des charges ? <button type="button" class="btn danger" id="delYes">Supprimer</button><button type="button" class="btn" id="delNo">Annuler</button></div>`
+   :`<button type="button" class="btn danger" id="delAsk">Supprimer ce cahier des charges</button>`;
+}
+
+/* Export */
+const val=k=>String(current?.f?.[k]??"").trim();
+function toMarkdown(){
+  const L=[`# Cahier des charges – ${val("entreprise")||"Client"}`,"",`Statut : ${statusLabel(current.status)}${current.updatedAt?" · mis à jour le "+fmtDate(current.updatedAt):""}`,""];
+  PAGES.forEach(p=>{L.push(`## ${p.title}`,"");
+    p.groups.forEach(g=>{ if(g.woo&&!current.woo) return;
+      const lines=[];
+      (g.checks||[]).forEach(([k,l])=>lines.push(`- [${current.checks?.[k]?"x":" "}] ${l}`));
+      (g.fields||[]).forEach(([k,l])=>{const v=val(k);if(v)lines.push(v.includes("\n")?`- **${l} :**\n${v.split("\n").map(x=>"  - "+x).join("\n")}`:`- **${l} :** ${v}`)});
+      if(lines.length){if(g.title)L.push(`### ${g.title}`,"");L.push(...lines,"")}
+    });});
+  return L.join("\n").replace(/\n{3,}/g,"\n\n");
+}
+function toBrief(){
+  const list=k=>val(k)?val(k).split("\n").filter(Boolean).map(x=>"- "+x).join("\n"):"- (à définir)";
+  return `Crée la maquette d'un site ${current.woo?"e-commerce":"vitrine"} pour ${val("entreprise")||"[client]"}.
+
+Activité : ${val("activite")||"(à compléter)"}
+Services / produits : ${val("services")||"(à compléter)"}
+Objectifs et cibles : ${val("objectifs")||"(à compléter)"}
+
+Pages du menu :
+${list("arborescence")}
+
+Footer :
+${list("footer_menu")}
+
+Contenus répétitifs (une page liste + une page détail par élément) : ${val("repetitifs")||"aucun"}
+Formulaires : ${val("formulaires")||"formulaire de contact"}
+Fonctionnalités : ${[val("specificites"),val("avis")&&"avis clients : "+val("avis")].filter(Boolean).join(" ; ")||"aucune particulière"}${current.woo?"\nBoutique : catalogue, fiche produit, panier, paiement ("+(val("woo_paiement")||"à définir")+")":""}
+
+Design :
+- Charte : ${val("charte")||"à proposer"}
+- Couleurs : ${val("couleurs")||"à proposer"}
+- Polices : ${val("polices")||"Google Fonts au choix"}
+- Sites de référence :
+${list("references")}
+
+Coordonnées à afficher : ${[val("adresse"),val("telephone"),val("email"),val("horaires")].filter(Boolean).join(" · ")||"(à compléter)"}
+Mots-clés : ${val("motscles")||"(à compléter)"}
+
+Contraintes techniques (obligatoires) :
+- React + Tailwind, textes en français, ton professionnel.
+- Chaque section porte un attribut data-section explicite.
+- Fournis un fichier design-tokens.json (couleurs, typographies par taille d'écran, espacements) et un SECTIONS.md qui décrit chaque section et son comportement responsive.
+- Responsive soigné en 1440, 768 et 375 px.
+- Images libres de droit en attendant les photos du client ; aucun texte de remplissage type lorem ipsum.`;
+}
+function exportHTML(){
+  return `<h2 class="page-title">Export</h2><div class="export" style="margin-top:16px">
+   <div class="card"><h3>Brief maquette Emergent</h3><p>À coller dans Emergent pour générer la maquette à partir de ce cahier des charges.</p>
+    <pre id="briefTxt">${esc(toBrief())}</pre><div class="row"><button type="button" class="btn primary" data-copy="briefTxt">Copier le brief</button></div></div>
+   <div class="card"><h3>Cahier des charges pour Claude</h3><p>Format Markdown, à coller dans une conversation ou à joindre au projet client.</p>
+    <pre id="mdTxt">${esc(toMarkdown())}</pre><div class="row"><button type="button" class="btn primary" data-copy="mdTxt">Copier</button><button type="button" class="btn" id="dlMd">Télécharger (.md)</button></div></div>
+  </div>`;
+}
+
+/* Sauvegarde */
+function setSaved(t){$("#saved").textContent=t}
+function queueSave(patch){
+  for(const [k,v] of Object.entries(patch)){ if((k==="f"||k==="checks")&&v&&typeof v==="object") pending[k]={...(pending[k]||{}),...v}; else pending[k]=v; }
+  setSaved("Enregistrement…");
+  clearTimeout(saveTimer); saveTimer=setTimeout(flush,600);
+}
+async function flush(){
+  if(!current) return; const patch={...pending}; for(const k in pending) delete pending[k];
+  patch.updatedAt=Date.now(); current.updatedAt=patch.updatedAt;
+  if(localMode||!coll){setSaved("Non enregistré (aperçu)");return}
+  try{await coll.doc(current.id).update(patch);setSaved("Enregistré")}
+  catch(e){ if(e?.code==="unavailable"){setTimeout(()=>{queueSave(patch)},800+Math.random()*700)} else setSaved("Échec de l'enregistrement") }
+}
+
+/* Événements */
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.id==="q"){query=t.value;renderList();return}
+  if(t.dataset.k&&current){const k=t.dataset.k;current.f={...(current.f||{}),[k]:t.value};queueSave({f:{[k]:t.value}});
+    if(k==="entreprise")$("#title").textContent=t.value||"Nouveau client";
+    const tab=document.querySelector(`.tab[data-tab="${activeTab}"] .pct`);const pg=PAGES.find(p=>p.id===activeTab);if(tab&&pg)tab.textContent=pagePct(pg)+" %";}
+});
+document.addEventListener("change",e=>{
+  const t=e.target;if(!current)return;
+  if(t.id==="status"){current.status=t.value;queueSave({status:t.value});renderList()}
+  if(t.dataset.c){current.checks={...(current.checks||{}),[t.dataset.c]:t.checked};queueSave({checks:{[t.dataset.c]:t.checked}})}
+  if(t.id==="woo"){current.woo=t.checked;queueSave({woo:t.checked});renderEditor()}
+});
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.f){filter=b.dataset.f;renderList();return}
+  if(b.dataset.id){open(b.dataset.id);return}
+  if(b.dataset.tab){activeTab=b.dataset.tab;if(activeTab==="export"&&current){await flush()}renderEditor();return}
+  if(b.id==="newBtn"){createNew();return}
+  if(b.id==="delAsk"){renderDelete.ask=true;renderDelete();return}
+  if(b.id==="delNo"){renderDelete.ask=false;renderDelete();return}
+  if(b.id==="delYes"){renderDelete.ask=false;const id=current.id;
+    if(!localMode&&coll){try{await coll.doc(id).delete()}catch(err){toast("Suppression impossible");return}}
+    docs=docs.filter(d=>d.id!==id);current=null;currentId=null;renderList();renderEditor();toast("Cahier des charges supprimé");return}
+  if(b.dataset.copy){const txt=document.getElementById(b.dataset.copy).textContent;
+    try{await navigator.clipboard.writeText(txt);toast("Copié")}catch(err){const r=document.createRange();r.selectNodeContents(document.getElementById(b.dataset.copy));const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Texte sélectionné : Ctrl+C pour copier")}return}
+  if(b.id==="dlMd"){const dl=await window.claude?.use?.("downloads").catch(()=>null);
+    if(!dl){toast("Téléchargement indisponible ici : utilisez « Copier »");return}
+    const name=(val("entreprise")||"client").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-|-$/g,"");
+    try{await dl.save({filename:`CDC-${name}.md`,data:toMarkdown()});toast("Fichier enregistré")}catch(err){if(err?.code!=="declined")toast("Téléchargement impossible")}return}
+});
+
+function open(id){
+  if(current&&Object.keys(pending).length){clearTimeout(saveTimer);flush()}
+  currentId=id;const d=docs.find(x=>x.id===id);current=d?structuredClone(d):null;renderDelete.ask=false;
+  if(activeTab==="export")activeTab="client";renderList();renderEditor();
+  if(innerWidth<900)$("#sheet").scrollIntoView({behavior:"smooth"});
+}
+async function createNew(){
+  const now=Date.now();const body={name:"Nouveau client",status:"rdv",woo:false,createdAt:now,updatedAt:now,f:{...DEFAULTS},checks:{}};
+  if(localMode||!coll){const id="local-"+now;docs.unshift({id,...body});open(id);toast("Aperçu : ce cahier des charges ne sera pas enregistré");return}
+  try{const ref=coll.doc();await ref.set(body);docs.unshift({id:ref.id,...body});activeTab="client";open(ref.id);setTimeout(()=>document.getElementById("f_entreprise")?.focus(),50)}
+  catch(e){toast(e?.code==="quota_exceeded"?"Limite de stockage atteinte : supprimez d'anciens cahiers des charges":"Création impossible, réessayez")}
+}
+
+/* Données partagées */
+function applySnapshot(snap){
+  docs=snap.docs.map(s=>({id:s.id,...s.data()})).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  renderList();
+  if(currentId){const d=docs.find(x=>x.id===currentId);
+    if(!d){current=null;currentId=null;renderEditor();return}
+    const focused=document.activeElement?.dataset?.k;
+    const merged=structuredClone(d);
+    for(const k in pending.f||{}) merged.f[k]=current.f[k];
+    if(focused) merged.f[focused]=current.f?.[focused]??merged.f?.[focused];
+    const changedOutside=JSON.stringify(merged.f)!==JSON.stringify(current.f)||merged.status!==current.status||merged.woo!==current.woo||JSON.stringify(merged.checks)!==JSON.stringify(current.checks);
+    current=merged;
+    if(changedOutside){
+      if(merged.woo!==!!document.getElementById("woo")?.checked){renderEditor();return}
+      ALL_FIELDS.forEach(([k])=>{const el=document.getElementById("f_"+k);if(el&&k!==focused&&el.value!==(merged.f?.[k]??""))el.value=merged.f?.[k]??""});
+      document.querySelectorAll("[data-c]").forEach(el=>{el.checked=!!merged.checks?.[el.dataset.c]});
+      $("#status").value=merged.status;$("#title").textContent=merged.f?.entreprise||"Nouveau client";renderTabs();
+    }
+  }
+}
+(async()=>{
+  db=await window.claude?.use?.("db").catch(()=>null);
+  if(!db){localMode=true;$("#dbnote").textContent="Aperçu : rien n'est enregistré dans cette vue";docs=[];renderList();return}
+  coll=db.collection("cdc");
+  coll.onSnapshot(applySnapshot,err=>{$("#dbnote").textContent="Connexion interrompue : rechargez la page";});
+})();
+</script>
